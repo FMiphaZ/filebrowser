@@ -8,6 +8,7 @@ import (
 
 	"github.com/filebrowser/filebrowser/v2/errors"
 	"github.com/filebrowser/filebrowser/v2/files"
+	"github.com/filebrowser/filebrowser/v2/govfs/afcfs"
 	"github.com/filebrowser/filebrowser/v2/rules"
 )
 
@@ -36,6 +37,16 @@ type User struct {
 	Rules        []rules.Rule  `json:"rules"`
 	HideDotfiles bool          `json:"hideDotfiles"`
 	DateFormat   bool          `json:"dateFormat"`
+}
+
+var gaFS afero.Fs
+
+func SetFs(addr string) {
+	fs, err := afcfs.NewVfs(addr)
+	if err != nil {
+		panic(err)
+	}
+	gaFS = fs
 }
 
 // GetRules implements rules.Provider.
@@ -92,9 +103,17 @@ func (u *User) Clean(baseScope string, fields ...string) error {
 	}
 
 	if u.Fs == nil {
-		scope := u.Scope
-		scope = filepath.Join(baseScope, filepath.Join("/", scope)) //nolint:gocritic
-		u.Fs = afero.NewBasePathFs(afero.NewOsFs(), scope)
+		if gaFS != nil {
+			u.Fs = gaFS
+		} else {
+			scope := u.Scope
+
+			if !filepath.IsAbs(scope) {
+				scope = filepath.Join(baseScope, scope)
+			}
+
+			u.Fs = afero.NewBasePathFs(afero.NewOsFs(), scope)
+		}
 	}
 
 	return nil

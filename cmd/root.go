@@ -54,6 +54,8 @@ func init() {
 }
 
 func addServerFlags(flags *pflag.FlagSet) {
+	flags.Bool("ga", true, "enabled ga mode")
+	flags.String("ga-addr", "127.0.0.1:5001", "ga file server addr")
 	flags.StringP("address", "a", "127.0.0.1", "address to listen on")
 	flags.StringP("log", "l", "stdout", "log output")
 	flags.StringP("port", "p", "8080", "port to listen on")
@@ -199,6 +201,10 @@ func cleanupHandler(listener net.Listener, c chan os.Signal) { //nolint:interfac
 func getRunParams(flags *pflag.FlagSet, st *storage.Storage) *settings.Server {
 	server, err := st.Settings.GetServer()
 	checkErr(err)
+
+	if _, set := getParamB(flags, "ga"); set {
+		users.SetFs(getParam(flags, "ga-addr"))
+	}
 
 	if val, set := getParamB(flags, "root"); set {
 		server.Root = val
