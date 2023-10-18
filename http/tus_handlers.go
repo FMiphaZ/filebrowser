@@ -32,7 +32,7 @@ func tusPostHandler() handleFunc {
 			}
 
 			dirPath := filepath.Dir(r.URL.Path)
-			if _, statErr := d.user.Fs.Stat(dirPath); os.IsNotExist(statErr) || strings.Contains(statErr.Error(), "ObjectNotFound") {
+			if _, statErr := d.user.Fs.Stat(dirPath); statErr != nil && (os.IsNotExist(statErr) || strings.Contains(statErr.Error(), "ObjectNotFound")) {
 				if mkdirErr := d.user.Fs.MkdirAll(dirPath, files.PermDir); mkdirErr != nil {
 					return http.StatusInternalServerError, err
 				}
