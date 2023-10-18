@@ -8,6 +8,7 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
+	"strings"
 
 	"github.com/spf13/afero"
 
@@ -25,7 +26,7 @@ func tusPostHandler() handleFunc {
 			Checker:    d,
 		})
 		switch {
-		case errors.Is(err, afero.ErrFileNotFound):
+		case errors.Is(err, afero.ErrFileNotFound) || strings.Contains(err.Error(), "ObjectNotFound"):
 			if !d.user.Perm.Create || !d.Check(r.URL.Path) {
 				return http.StatusForbidden, nil
 			}

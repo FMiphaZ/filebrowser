@@ -619,7 +619,7 @@ func (conn *AfcService) SetFileTime(path string, t time.Time) error {
 func (conn *AfcService) RemovePathAndContents(path string) error {
 	conn.mutex.Lock()
 	defer conn.mutex.Unlock()
-	_, err := conn.request(AFC_OP_REMOVE_PATH_AND_CONTENTS, []byte(path), nil)
+	_, err := conn.request(Afc_operation_remove_path, []byte(path), nil)
 	return err
 }
 
