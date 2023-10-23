@@ -360,7 +360,14 @@ var diskUsage = withUser(func(w http.ResponseWriter, r *http.Request, d *data) (
 
 	usage, err := disk.UsageWithContext(r.Context(), fPath)
 	if err != nil {
-		return errToStatus(err), err
+		usage = &disk.UsageStat{
+			Path:        fPath,
+			Total:       0,
+			Free:        0,
+			Used:        0,
+			UsedPercent: 0,
+		}
+		// return errToStatus(err), err
 	}
 	return renderJSON(w, r, &DiskUsageResponse{
 		Total: usage.Total,
